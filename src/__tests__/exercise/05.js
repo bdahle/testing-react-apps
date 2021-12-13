@@ -5,7 +5,6 @@ import * as React from 'react'
 import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import {build, fake} from '@jackfranklin/test-data-bot'
-import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import Login from '../../components/login-submission'
 import {handlers} from 'test/server-handlers'
@@ -37,10 +36,8 @@ test(`logging in displays the user's username`, async () => {
 
 test('error displayed when missing field', async () => {
   render(<Login />)
-
   userEvent.click(screen.getByRole('button', {name: /submit/i}))
-
   await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
-  expect(screen.getByText(/required/i)).toBeInTheDocument()
+  expect(screen.getByRole('alert').textContent).toMatchSnapshot()
 })
