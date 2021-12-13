@@ -8,6 +8,7 @@ import {build, fake} from '@jackfranklin/test-data-bot'
 import {rest} from 'msw'
 import {setupServer} from 'msw/node'
 import Login from '../../components/login-submission'
+import {handlers} from 'test/server-handlers'
 
 const buildLoginForm = build({
   fields: {
@@ -16,20 +17,7 @@ const buildLoginForm = build({
   },
 })
 
-const server = setupServer(
-  rest.post(
-    'https://auth-provider.example.com/api/login',
-    async (req, res, ctx) => {
-      if (!req.body.password) {
-        return res(ctx.status(400), ctx.json({message: 'password required'}))
-      }
-      if (!req.body.username) {
-        return res(ctx.status(400), ctx.json({message: 'username required'}))
-      }
-      return res(ctx.json({username: req.body.username}))
-    },
-  ),
-)
+const server = setupServer(...handlers)
 
 beforeAll(() => server.listen())
 afterAll(() => server.close())
@@ -45,4 +33,14 @@ test(`logging in displays the user's username`, async () => {
   await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
   expect(screen.getByText(username)).toBeInTheDocument()
+})
+
+test('error displayed when missing field', async () => {
+  render(<Login />)
+
+  userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
+
+  expect(screen.getByText(/required/i)).toBeInTheDocument()
 })
