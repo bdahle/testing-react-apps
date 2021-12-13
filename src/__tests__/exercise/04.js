@@ -3,13 +3,14 @@
 
 import * as React from 'react'
 import {render, screen} from '@testing-library/react'
+import faker from 'faker'
 import userEvent from '@testing-library/user-event'
 import Login from '../../components/login'
 
 test('submitting the form calls onSubmit with username and password', () => {
   const handleSubmit = jest.fn()
   render(<Login onSubmit={handleSubmit} />)
-  const username = 'user'
+  const username = faker.internet.username()
   const password = 'pass'
 
   userEvent.type(screen.getByLabelText(/username/i), username)
