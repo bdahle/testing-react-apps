@@ -6,6 +6,12 @@ import {render, screen, act} from '@testing-library/react'
 import Location from '../../examples/location'
 
 // 🐨 set window.navigator.geolocation to an object that has a getCurrentPosition mock function
+// jest.mock('../../examples/location')
+beforeAll(() => {
+  window.navigator.geolocation = {
+    getCurrentPosition: jest.fn(),
+  }
+})
 
 // 💰 I'm going to give you this handy utility function
 // it allows you to create a promise that you can resolve/reject on demand.
@@ -26,6 +32,34 @@ function deferred() {
 // // assert on the resolved state
 
 test('displays the users current location', async () => {
+  const fakePosition = {
+    coords: {
+      latitude: 50,
+      longitude: 60,
+    },
+  }
+  const {promise, resolve} = deferred()
+  window.navigator.geolocation.getCurrentPosition.mockImplementation(
+    callback => {
+      promise.then(() => callback(fakePosition))
+    },
+  )
+
+  render(<Location />)
+  expect(screen.getByLabelText(/loading/i)).toBeInTheDocument()
+
+  resolve()
+  await promise
+
+  expect(screen.queryByLabelText(/loading/i)).not.toBeInTheDocument()
+
+  expect(screen.getByText(/latitude/i)).toHaveTextContent(
+    `Latitude: ${fakePosition.coords.latitude}`,
+  )
+  expect(screen.getByText(/longitude/i)).toHaveTextContent(
+    `Longitude: ${fakePosition.coords.longitude}`,
+  )
+
   // 🐨 create a fakePosition object that has an object called "coords" with latitude and longitude
   // 📜 https://developer.mozilla.org/en-US/docs/Web/API/GeolocationPosition
   //
@@ -34,6 +68,7 @@ test('displays the users current location', async () => {
   // 🐨 Now we need to mock the geolocation's getCurrentPosition function
   // To mock something you need to know its API and simulate that in your mock:
   // 📜 https://developer.mozilla.org/en-US/docs/Web/API/Geolocation/getCurrentPosition
+
   //
   // here's an example of the API:
   // function success(position) {}
@@ -43,7 +78,9 @@ test('displays the users current location', async () => {
   // 🐨 so call mockImplementation on getCurrentPosition
   // 🐨 the first argument of your mock should accept a callback
   // 🐨 you'll call the callback when the deferred promise resolves
+  // Location.getCurrentPosition()
   // 💰 promise.then(() => {/* call the callback with the fake position */})
+  // promise.then(() => {})
   //
   // 🐨 now that setup is done, render the Location component itself
   //
