@@ -20,4 +20,24 @@ test('exposes the count and increment/decrement functions', () => {
   expect(result.count).toBe(0)
 })
 
+test('allows customisation of the initial count', () => {
+  const results = {}
+  function TestComponent(props) {
+    Object.assign(results, useCounter(props))
+    return null
+  }
+  render(<TestComponent initialCount={1} />)
+  expect(results.count).toBe(1)
+})
+
+test('allows customisation of the step', () => {
+  const results = {}
+  function TestComponent(props) {
+    Object.assign(results, useCounter(props))
+    return null
+  }
+  render(<TestComponent step={2} />)
+  act(() => results.increment())
+  expect(results.count).toBe(2)
+})
 /* eslint no-unused-vars:0 */
