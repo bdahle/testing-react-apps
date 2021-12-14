@@ -3,7 +3,6 @@
 
 import * as React from 'react'
 import {screen} from '@testing-library/react'
-import {ThemeProvider} from '../../components/theme'
 import EasyButton from '../../components/easy-button'
 import {render} from 'test/test-utils'
 
